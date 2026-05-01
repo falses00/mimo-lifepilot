@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ${project}-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MIMO_DATA_DIR
+        value: /tmp/mimo-data
