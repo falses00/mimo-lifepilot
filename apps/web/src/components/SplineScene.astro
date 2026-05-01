@@ -1,0 +1,90 @@
+---
+interface Props {
+  sceneUrl?: string;
+  title?: string;
+  height?: string;
+}
+
+const { sceneUrl = '', title = 'Spline scene', height = '320px' } = Astro.props;
+const hasScene = !!sceneUrl;
+---
+
+<div
+  class="spline-wrapper"
+  style={`height: ${height};`}
+  data-spline-wrapper={hasScene ? 'true' : 'false'}
+  data-scene-url={sceneUrl}
+  data-scene-title={title}
+  data-scene-status={hasScene ? 'temporary-demo-scene' : 'fallback'}
+>
+  {hasScene && <div class="spline-container" aria-hidden="true"></div>}
+  <div class="spline-fallback">
+    <div class="grid-bg"></div>
+    <div class="fallback-core"></div>
+    <div class="fallback-content">
+      <div class="fallback-label">{title}</div>
+      <div class="fallback-hint">Temporary Spline demo scene</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .spline-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 1rem; border: 1px solid rgba(212, 175, 55, 0.22); background: #10141b; }
+  .spline-container { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 240ms ease; }
+  .spline-wrapper.is-loaded .spline-container { opacity: 1; }
+  .spline-container iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .spline-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background: linear-gradient(135deg, #10141b 0%, #18202c 55%, #251f16 100%); }
+  .spline-wrapper.is-loaded .spline-fallback { opacity: 0; pointer-events: none; }
+  .grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(212,175,55,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.07) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%); }
+  .fallback-core { position: absolute; width: min(40vw, 240px); aspect-ratio: 1; border-radius: 999px; background: radial-gradient(circle, rgba(212,175,55,0.36), rgba(212,175,55,0.08) 48%, transparent 70%); filter: blur(8px); animation: breathe 7s ease-in-out infinite; }
+  .fallback-content { position: relative; text-align: center; padding: 1rem; }
+  .fallback-label { color: #f7f2e8; font-size: 1rem; font-weight: 700; }
+  .fallback-hint { color: #d4af37; font-size: 0.75rem; margin-top: 0.35rem; }
+  @keyframes breathe { 0%, 100% { transform: scale(0.96); opacity: 0.72; } 50% { transform: scale(1.05); opacity: 1; } }
+  @media (max-width: 767px), (prefers-reduced-motion: reduce) { .spline-container { display: none; } .fallback-core { animation: none; } }
+</style>
+
+<script>
+  const shouldKeepFallback = () => {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    return isMobile || reduceMotion || connection?.saveData === true;
+  };
+
+  const mountSplineScenes = () => {
+    if (shouldKeepFallback()) return;
+    document.querySelectorAll<HTMLElement>('[data-spline-wrapper="true"]').forEach((wrapper) => {
+      if (wrapper.dataset.splineMounted === 'true') return;
+      const sceneUrl = wrapper.dataset.sceneUrl;
+      const sceneTitle = wrapper.dataset.sceneTitle || 'Spline scene';
+      const container = wrapper.querySelector<HTMLElement>('.spline-container');
+      if (!sceneUrl || !container) return;
+      wrapper.dataset.splineMounted = 'true';
+      const iframe = document.createElement('iframe');
+      iframe.src = sceneUrl;
+      iframe.title = sceneTitle;
+      iframe.loading = 'lazy';
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.style.pointerEvents = 'none';
+      iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('aria-hidden', 'true');
+      iframe.addEventListener('load', () => {
+        wrapper.classList.add('is-loaded');
+        container.setAttribute('aria-hidden', 'false');
+      });
+      iframe.addEventListener('error', () => {
+        wrapper.classList.remove('is-loaded');
+        container.replaceChildren();
+      });
+      container.appendChild(iframe);
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountSplineScenes, { once: true });
+  } else {
+    mountSplineScenes();
+  }
+</script>
