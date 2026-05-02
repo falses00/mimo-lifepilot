@@ -1,9 +1,7 @@
 ---
-import SplineScene from '../components/SplineScene.astro';
-import { defaultSplineScene } from '../data/splineScenes';
-
 const title = 'LifePilot - AI 生活管家';
 const description = '用一句话记录今天做了什么、接下来要做什么，自动生成已办、待办、提醒和生活计划。';
+const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
 ---
 
 <html lang="zh-CN">
@@ -12,34 +10,396 @@ const description = '用一句话记录今天做了什么、接下来要做什�
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <style>
-    :root { --bg: #0c1017; --card: #171f2c; --gold: #d4af37; --text: #f7f2e8; --muted: #a7a194; --border: rgba(255,255,255,0.08); }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, system-ui, sans-serif; color: var(--text); background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.16), transparent 34%), linear-gradient(135deg, #0c1017 0%, #161f2b 58%, #241f16 100%); min-height: 100vh; }
-    .container { max-width: 1120px; margin: 0 auto; padding: 5rem 1.5rem; }
-    .eyebrow { display: inline-flex; padding: 0.4rem 0.8rem; border-radius: 999px; color: var(--gold); border: 1px solid rgba(212,175,55,0.28); background: rgba(212,175,55,0.08); font-size: 0.78rem; font-weight: 700; }
-    h1 { margin: 1.2rem 0 0.8rem; font-size: clamp(2.2rem, 6vw, 4.8rem); line-height: 1; letter-spacing: 0; }
-    .lead { max-width: 720px; color: var(--muted); font-size: 1.08rem; line-height: 1.7; }
-    .scene { margin: 2.5rem 0; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-    .card { padding: 1.25rem; border-radius: 0.75rem; background: rgba(23,31,44,0.76); border: 1px solid var(--border); }
-    .card strong { display: block; margin-bottom: 0.4rem; color: var(--gold); }
-    .card span { color: var(--muted); font-size: 0.92rem; line-height: 1.55; }
-    @media (max-width: 760px) { .container { padding: 3rem 1rem; } .grid { grid-template-columns: 1fr; } }
+    :root { 
+      --bg: #0b0d12; 
+      --surface: #11151d; 
+      --card: #171c26; 
+      --gold: #d4af37; 
+      --gold-soft: #b8922f; 
+      --text: #f7f2e8; 
+      --text-muted: #918a7c; 
+      --border: rgba(255,255,255,0.06);
+      --success: #4ade80;
+      --warning: #fbbf24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    
+    /* Navigation */
+    .nav { 
+      position: sticky; top: 0; z-index: 50; 
+      padding: 0.75rem 1.5rem; 
+      background: rgba(11,13,18,0.85); 
+      backdrop-filter: blur(12px); 
+      border-bottom: 1px solid var(--border); 
+    }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.25rem; font-weight: 700; color: var(--gold); }
+    .nav-links { display: flex; gap: 1rem; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.875rem; }
+    .nav-links a:hover { color: var(--text); }
+    
+    /* Hero */
+    .hero { 
+      text-align: center; padding: 4rem 0 3rem; 
+      background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.12), transparent 50%); 
+    }
+    .hero h1 { 
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+    
+    /* Main layout */
+    .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    
+    /* Cards */
+    .card { 
+      background: var(--card); border: 1px solid var(--border); 
+      border-radius: 1rem; padding: 1.5rem; 
+    }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    
+    /* Form elements */
+    textarea, input { 
+      width: 100%; padding: 0.75rem; border-radius: 0.5rem; 
+      background: var(--surface); border: 1px solid var(--border); 
+      color: var(--text); font-size: 0.875rem; font-family: inherit; 
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    textarea:focus, input:focus { outline: none; border-color: var(--gold); }
+    
+    /* Buttons */
+    .btn { 
+      padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; 
+      font-size: 0.875rem; border: none; cursor: pointer; transition: all 0.2s; 
+    }
+    .btn-primary { background: var(--gold); color: var(--bg); }
+    .btn-primary:hover { background: var(--gold-soft); }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--card); }
+    .actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    
+    /* Badges */
+    .badge { 
+      display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; 
+      font-size: 0.75rem; font-weight: 600; 
+    }
+    .badge-gold { background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid rgba(212,175,55,0.3); }
+    .badge-success { background: rgba(74,222,128,0.1); color: var(--success); }
+    
+    /* Items */
+    .item { 
+      display: flex; align-items: center; gap: 0.75rem; 
+      padding: 0.75rem; border-radius: 0.5rem; 
+      background: var(--surface); margin-bottom: 0.5rem; 
+    }
+    .item-check { 
+      width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; 
+      border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; 
+    }
+    .item-check.checked { background: var(--gold); border-color: var(--gold); }
+    .item-content { flex: 1; }
+    .item-title { font-size: 0.875rem; }
+    .item-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    
+    /* Hidden */
+    .hidden { display: none !important; }
+    
+    /* Guide */
+    .guide { margin-bottom: 1.5rem; }
+    .guide p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    
+    /* Timeline */
+    .timeline { margin-top: 1.5rem; }
+    .timeline-item { 
+      display: flex; gap: 1rem; padding: 0.75rem; 
+      border-radius: 0.5rem; background: var(--surface); 
+      margin-bottom: 0.5rem; 
+    }
+    .timeline-time { font-size: 0.75rem; color: var(--gold); font-weight: 600; white-space: nowrap; }
+    
+    /* Suggestions */
+    .suggestion { 
+      padding: 0.75rem; border-radius: 0.5rem; 
+      background: var(--surface); margin-bottom: 0.5rem; 
+      font-size: 0.875rem; color: var(--text-muted); 
+    }
   </style>
 </head>
 <body>
-  <main class="container">
-    <span class="eyebrow">temporary-demo-scene</span>
-    <h1>LifePilot</h1>
-    <p class="lead">{description} 当前使用公开 Spline demo scene 验证真实嵌入与性能，后续替换为自有品牌场景。</p>
-    <div class="scene">
-      <SplineScene sceneUrl={defaultSplineScene.sceneUrl} title="LifePilot temporary 3D scene" height="360px" />
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">LifePilot</a>
+      <div class="nav-links">
+        <a href="#workbench">工作台</a>
+        <a href="#timeline">今日计划</a>
+        <a href="https://github.com/falses00/mimo-lifepilot" target="_blank">GitHub</a>
+      </div>
     </div>
-    <section class="grid">
-      <div class="card"><strong>Plan</strong><span>自然语言记录、待办拆解和生活计划整理。</span></div>
-      <div class="card"><strong>Local First</strong><span>无后端时可用本地模式，后续接入 API 同步。</span></div>
-      <div class="card"><strong>Fallback</strong><span>移动端与加载失败时自动保留 CSS 视觉。</span></div>
-    </section>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>LifePilot</h1>
+      <p>AI 生活管家：用一句话记录今天做了什么、接下来要做什么，自动整理成已办、待办、提醒、习惯与计划。</p>
+    </div>
+  </section>
+
+  <!-- Main Workbench -->
+  <main class="main" id="workbench">
+    <div class="grid">
+      <!-- Left: Input -->
+      <div>
+        <div class="card guide">
+          <h3>💡 新手引导</h3>
+          <p>1. 输入一句话描述你的生活</p>
+          <p>2. 点击"生成我的生活计划"</p>
+          <p>3. 查看解析结果并编辑</p>
+          <button class="btn btn-secondary" id="btn-example" style="margin-top: 0.75rem;">使用示例</button>
+        </div>
+
+        <div class="card">
+          <h3>✍️ 记录你的生活</h3>
+          <textarea id="life-input" placeholder="输入一句话，例如：我今天写完了博客，跑了 3 公里，明天要投简历..."></textarea>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-generate">🚀 生成我的生活计划</button>
+            <button class="btn btn-secondary" id="btn-clear">清空</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>⚙️ 设置</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.875rem; color: var(--text-muted);">API 模式</span>
+              <span class="badge badge-gold">{apiBaseUrl ? '已启用' : '本地模式'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Results -->
+      <div>
+        <!-- Mode badge -->
+        <div style="margin-bottom: 1rem;">
+          <span class="badge badge-gold" id="mode-badge">{apiBaseUrl ? 'API 模式' : '本地模式'}</span>
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="card" style="text-align: center; padding: 3rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+          <h3>开始记录</h3>
+          <p style="color: var(--text-muted);">输入一句话，系统会自动解析</p>
+        </div>
+
+        <!-- Done section -->
+        <div id="done-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>✅ 已完成 <span id="done-count" class="badge badge-success">0</span></h3>
+          <div id="done-list"></div>
+        </div>
+
+        <!-- Todos section -->
+        <div id="todos-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>📋 待办事项 <span id="todos-count" class="badge badge-gold">0</span></h3>
+          <div id="todos-list"></div>
+        </div>
+
+        <!-- Habits section -->
+        <div id="habits-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>🏃 习惯记录 <span id="habits-count" class="badge badge-gold">0</span></h3>
+          <div id="habits-list"></div>
+        </div>
+
+        <!-- Bills section -->
+        <div id="bills-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>💰 账单/支出 <span id="bills-count" class="badge badge-gold">0</span></h3>
+          <div id="bills-list"></div>
+        </div>
+
+        <!-- Suggestions section -->
+        <div id="suggestions-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>💡 智能建议</h3>
+          <div id="suggestions-list"></div>
+        </div>
+
+        <!-- Timeline -->
+        <div id="timeline-section" class="card hidden" style="margin-bottom: 1rem;">
+          <h3>📅 今日时间线</h3>
+          <div id="timeline-list"></div>
+        </div>
+
+        <!-- Actions -->
+        <div id="action-buttons" class="actions hidden">
+          <button class="btn btn-primary" id="btn-save">💾 保存</button>
+          <button class="btn btn-secondary" id="btn-export">📄 导出日报</button>
+        </div>
+
+        <!-- History -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>📚 历史记录</h3>
+          <div id="history-list">
+            <p style="color: var(--text-muted); font-size: 0.875rem;">暂无历史记录</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <script>
+    const apiBaseUrl = '{apiBaseUrl}';
+    const input = document.getElementById('life-input');
+    const example = '我今天完成了博客首页优化，跑步 3 公里，明天上午要投简历，周五前准备 AI 面试项目。';
+    let currentItems = [];
+
+    function parseLocally(text) {
+      const done=[], todos=[], habits=[], bills=[], suggestions=[];
+      const doneKw=['完成了','写完了','做完了','跑了','学了','看完了','交了','处理了','已经','搞定'];
+      const todoKw=['要','需要','计划','准备','记得','明天','后天','周五前','下周'];
+      const habitKw=['跑步','健身','阅读','学习','冥想','喝水','运动'];
+      const billKw=['交了','支付','花了','买了','续费','房租','服务器','订阅'];
+
+      text.split(/[,，。；;\n]+/).filter(s=>s.trim()).forEach(seg=>{
+        const t=seg.trim();
+        if(billKw.some(k=>t.includes(k))||/\d+\s*(元|块)/.test(t)){
+          const m=t.match(/(\d+)\s*(元|块)/);
+          bills.push({title:t, amount:m?parseInt(m[1]):0});
+          if(doneKw.some(k=>t.includes(k))) done.push({title:t});
+          return;
+        }
+        if(habitKw.some(k=>t.includes(k))&&doneKw.some(k=>t.includes(k))){
+          habits.push({title:t});
+          done.push({title:t});
+          return;
+        }
+        if(doneKw.some(k=>t.includes(k))){done.push({title:t});return;}
+        if(todoKw.some(k=>t.includes(k))){
+          const due=t.includes('明天')?'明天':t.includes('后天')?'后天':t.includes('周五')?'周五':t.includes('下周')?'下周':'';
+          todos.push({title:t,due});
+          return;
+        }
+        if(habitKw.some(k=>t.includes(k))){habits.push({title:t});return;}
+        todos.push({title:t});
+      });
+
+      if(todos.length) suggestions.push(`建议今天先完成: ${todos[0].title}`);
+      if(habits.length) suggestions.push('坚持记录习惯，有助于养成好习惯');
+      if(bills.length) suggestions.push(`今日支出 ${bills.reduce((s,b)=>s+b.amount,0)} 元`);
+
+      return {done, todos, habits, bills, suggestions};
+    }
+
+    async function generate() {
+      const text=input.value.trim();
+      if(!text){alert('请输入内容');return;}
+      
+      const btn=document.getElementById('btn-generate');
+      btn.disabled=true; btn.textContent='⏳ 解析中...';
+      
+      let result;
+      try{
+        if(apiBaseUrl){
+          const r=await fetch(`${apiBaseUrl}/api/lifepilot/parse-entry`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({text})
+          });
+          if(r.ok) result=await r.json();
+        }
+      }catch(e){}
+      
+      if(!result) result=parseLocally(text);
+      currentItems=[...result.done,...result.todos,...result.habits,...result.bills];
+      
+      document.getElementById('empty-state').classList.add('hidden');
+      
+      if(result.done.length){
+        document.getElementById('done-section').classList.remove('hidden');
+        document.getElementById('done-count').textContent=result.done.length;
+        document.getElementById('done-list').innerHTML=result.done.map(i=>
+          `<div class="item"><div class="item-check checked"></div><div class="item-content"><div class="item-title">${i.title}</div></div></div>`
+        ).join('');
+      }
+      
+      if(result.todos.length){
+        document.getElementById('todos-section').classList.remove('hidden');
+        document.getElementById('todos-count').textContent=result.todos.length;
+        document.getElementById('todos-list').innerHTML=result.todos.map(i=>
+          `<div class="item"><div class="item-check" onclick="this.classList.toggle('checked')"></div><div class="item-content"><div class="item-title">${i.title}</div>${i.due?`<div class="item-meta">截止: ${i.due}</div>`:''}</div></div>`
+        ).join('');
+      }
+      
+      if(result.habits.length){
+        document.getElementById('habits-section').classList.remove('hidden');
+        document.getElementById('habits-count').textContent=result.habits.length;
+        document.getElementById('habits-list').innerHTML=result.habits.map(i=>
+          `<div class="item"><div class="item-content"><div class="item-title">🏃 ${i.title}</div></div></div>`
+        ).join('');
+      }
+      
+      if(result.bills.length){
+        document.getElementById('bills-section').classList.remove('hidden');
+        document.getElementById('bills-count').textContent=result.bills.length;
+        document.getElementById('bills-list').innerHTML=result.bills.map(i=>
+          `<div class="item"><div class="item-content"><div class="item-title">💰 ${i.title}</div>${i.amount?`<div class="item-meta">金额: ${i.amount}元</div>`:''}</div></div>`
+        ).join('');
+      }
+      
+      if(result.suggestions.length){
+        document.getElementById('suggestions-section').classList.remove('hidden');
+        document.getElementById('suggestions-list').innerHTML=result.suggestions.map(s=>
+          `<div class="suggestion">💡 ${s}</div>`
+        ).join('');
+      }
+      
+      // Timeline
+      document.getElementById('timeline-section').classList.remove('hidden');
+      document.getElementById('timeline-list').innerHTML = 
+        result.done.map(i=>`<div class="timeline-item"><span class="timeline-time">✅</span><span>${i.title}</span></div>`).join('') +
+        result.todos.map(i=>`<div class="timeline-item"><span class="timeline-time">📋</span><span>${i.title}${i.due?' ('+i.due+')':''}</span></div>`).join('');
+      
+      document.getElementById('action-buttons').classList.remove('hidden');
+      btn.disabled=false; btn.textContent='🚀 生成我的生活计划';
+    }
+
+    document.getElementById('btn-generate').addEventListener('click', generate);
+    document.getElementById('btn-example').addEventListener('click', ()=>{input.value=example;});
+    document.getElementById('btn-clear').addEventListener('click', ()=>{
+      input.value='';
+      ['empty-state','done-section','todos-section','habits-section','bills-section','suggestions-section','timeline-section','action-buttons'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(id==='empty-state') el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+    });
+    document.getElementById('btn-save').addEventListener('click',()=>{
+      localStorage.setItem('mimo_lifepilot',JSON.stringify({text:input.value,items:currentItems,ts:Date.now()}));
+      alert('已保存到本地');
+    });
+    document.getElementById('btn-export').addEventListener('click',()=>{
+      let md=`# 生活记录\n\n日期: ${new Date().toLocaleDateString('zh-CN')}\n\n`;
+      md+=`## 已完成\n${currentItems.filter(i=>i.title).map(i=>`- ${i.title}`).join('\n')}\n\n`;
+      md+=`---\n*由 LifePilot 生成*`;
+      const blob=new Blob([md],{type:'text/markdown'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`life-${new Date().toISOString().split('T')[0]}.md`;
+      a.click();
+    });
+    
+    // Load history
+    const saved=localStorage.getItem('mimo_lifepilot');
+    if(saved){
+      try{
+        const data=JSON.parse(saved);
+        document.getElementById('history-list').innerHTML=`<div class="item"><div class="item-content"><div class="item-title">${data.text?.substring(0,50)}...</div><div class="item-meta">${new Date(data.ts).toLocaleDateString('zh-CN')}</div></div></div>`;
+      }catch(e){}
+    }
+  </script>
 </body>
 </html>
