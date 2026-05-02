@@ -14,579 +14,458 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
       --bg-deep: #0a0e17;
       --bg-surface: #0f1420;
       --bg-card: #141b2d;
-      --bg-glass: rgba(20, 27, 45, 0.7);
       --gold: #d4af37;
       --gold-soft: #b8922f;
-      --gold-glow: rgba(212, 175, 55, 0.15);
-      --amber: #f59e0b;
       --mint: #10b981;
       --blue: #6366f1;
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --border: rgba(255, 255, 255, 0.06);
-      --border-gold: rgba(212, 175, 55, 0.2);
       --success: #22c55e;
       --warning: #f59e0b;
-      --error: #ef4444;
+      --amber: #f59e0b;
     }
-    
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; }
     
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-deep);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    /* Background */
+    .bg-effects { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; }
+    .bg-orb-1 { width: 600px; height: 600px; background: var(--gold); top: -200px; right: -100px; }
+    .bg-orb-2 { width: 400px; height: 400px; background: var(--blue); bottom: -100px; left: -50px; }
+    .bg-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.3; }
     
-    /* Background effects */
-    .bg-effects {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    
-    .bg-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.15;
-    }
-    
-    .bg-orb-1 {
-      width: 600px;
-      height: 600px;
-      background: var(--gold);
-      top: -200px;
-      right: -100px;
-      animation: float 20s ease-in-out infinite;
-    }
-    
-    .bg-orb-2 {
-      width: 400px;
-      height: 400px;
-      background: var(--blue);
-      bottom: -100px;
-      left: -50px;
-      animation: float 25s ease-in-out infinite reverse;
-    }
-    
-    .bg-grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 60px 60px;
-      opacity: 0.3;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(30px, -30px); }
-    }
-    
-    /* Navigation */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 0.75rem 1.5rem;
-      background: rgba(10, 14, 23, 0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .nav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .nav-brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--gold);
-      text-decoration: none;
-    }
-    
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
-    
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.875rem;
-      transition: color 0.2s;
-    }
-    
+    /* Nav */
+    .nav { position: sticky; top: 0; z-index: 50; padding: 0.75rem 1.5rem; background: rgba(10,14,23,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.25rem; font-weight: 700; color: var(--gold); text-decoration: none; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.875rem; }
     .nav-links a:hover { color: var(--text-primary); }
+    .kbd { padding: 0.125rem 0.375rem; border-radius: 0.25rem; background: var(--bg-card); border: 1px solid var(--border); font-size: 0.7rem; font-family: monospace; color: var(--text-muted); }
     
-    .kbd {
-      padding: 0.125rem 0.375rem;
-      border-radius: 0.25rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      font-size: 0.7rem;
-      font-family: monospace;
-      color: var(--text-muted);
-    }
+    /* Hero */
+    .hero { padding: 6rem 0 4rem; }
+    .hero-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    @media (max-width: 1024px) { .hero-grid { grid-template-columns: 1fr; gap: 3rem; } }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.2); font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 1.5rem; }
+    .badge-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .title-main { display: block; font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold-soft)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .title-sub { display: block; font-size: 1.5rem; font-weight: 600; color: var(--text-secondary); margin-top: 0.5rem; }
+    .hero-desc { font-size: 1.125rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem; }
+    .hero-actions { display: flex; gap: 1rem; }
     
-    /* Hero Section */
-    .hero {
-      position: relative;
-      padding: 6rem 0 4rem;
-      overflow: hidden;
-    }
+    /* Spline Container */
+    .spline-container { position: relative; width: 100%; height: 400px; border-radius: 1rem; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); }
+    .spline-container iframe { width: 100%; height: 100%; border: none; }
+    .spline-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-deep), var(--bg-surface)); }
+    .fallback-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .fallback-text { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .fallback-desc { font-size: 0.875rem; color: var(--text-muted); }
     
-    .hero-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
+    /* Buttons */
+    .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--gold); color: var(--bg-deep); }
+    .btn-primary:hover { background: var(--gold-soft); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg-card); }
     
-    @media (max-width: 1024px) {
-      .hero-grid {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-      }
-    }
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
     
-    .hero-content {
-      position: relative;
-      z-index: 1;
-    }
+    /* Form */
+    textarea, input { width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-primary); font-size: 0.875rem; font-family: inherit; }
+    textarea { min-height: 120px; resize: vertical; }
+    textarea:focus, input:focus { outline: none; border-color: var(--gold); }
+    .actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
     
-    .hero-badge {
-      display: inline-flex;
-      align-items: AI 生活管家';
-    </style>
-  </head>
-  <body>
-    <!-- Background effects -->
-    <div class="bg-effects">
-      <div class="bg-orb bg-orb-1"></div>
-      <div class="bg-orb bg-orb-2"></div>
-      <div class="bg-grid"></div>
+    /* Workbench */
+    .workbench { padding: 2rem 0; }
+    .workbench-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 1024px) { .workbench-grid { grid-template-columns: 1fr; } }
+    
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    .stat-card { text-align: center; padding: 1rem; border-radius: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border); }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    
+    /* Items */
+    .item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; background: var(--bg-surface); margin-bottom: 0.5rem; }
+    .item-check { width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; }
+    .item-check.checked { background: var(--gold); border-color: var(--gold); }
+    .item-title { flex: 1; font-size: 0.875rem; }
+    .hidden { display: none !important; }
+    
+    /* Badge */
+    .badge { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-gold { background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid rgba(212,175,55,0.2); }
+    
+    /* Toast */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 0.5rem; background: var(--bg-card); border: 1px solid var(--border); transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 100; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { border-color: rgba(34,197,94,0.3); }
+    .toast-error { border-color: rgba(239,68,68,0.3); }
+    
+    /* Command Palette */
+    .command-palette { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.5); display: none; align-items: flex-start; justify-content: center; padding-top: 20vh; }
+    .command-palette.open { display: flex; }
+    .command-box { width: 90%; max-width: 500px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; }
+    .command-input { width: 100%; padding: 1rem; border: none; background: transparent; color: var(--text-primary); font-size: 1rem; border-bottom: 1px solid var(--border); }
+    .command-input:focus { outline: none; }
+    .command-list { max-height: 300px; overflow-y: auto; }
+    .command-item { padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; }
+    .command-item:hover { background: var(--bg-surface); }
+    
+    /* Empty State */
+    .empty-state { text-align: center; padding: 3rem; }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-title { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .empty-desc { font-size: 0.875rem; color: var(--text-muted); }
+    
+    /* Suggestion */
+    .suggestion { padding: 0.75rem; border-radius: 0.5rem; background: var(--bg-surface); margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+    
+    /* History */
+    .history-section { padding: 2rem 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="bg-effects">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">LifePilot</a>
+      <div class="nav-links">
+        <a href="#workbench">工作台</a>
+        <a href="#history">历史</a>
+        <a href="https://github.com/falses00/mimo-lifepilot" target="_blank">GitHub</a>
+        <span class="kbd">⌘K</span>
+      </div>
     </div>
+  </nav>
 
-    <!-- Navigation -->
-    <nav class="nav">
-      <div class="nav-inner">
-        <a href="/" class="nav-brand">LifePilot</a>
-        <div class="nav-links">
-          <a href="#workbench">工作台</a>
-          <a href="#history">历史</a>
-          <a href="https://github.com/falses00/mimo-lifepilot" target="_blank">GitHub</a>
-          <span class="kbd">⌘K</span>
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>AI 生活管家</span>
+        </div>
+        <h1>
+          <span class="title-main">LifePilot</span>
+          <span class="title-sub">一句话记录生活，AI 自动整理</span>
+        </h1>
+        <p class="hero-desc">
+          用一句话记录今天做了什么、接下来要做什么，自动生成已办、待办、提醒、习惯与计划。
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="btn-start">立即开始</button>
+          <button class="btn btn-secondary" id="btn-example">查看示例</button>
         </div>
       </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-content">
-          <div class="hero-badge">
-            <span class="badge-dot"></span>
-            <span>AI 生活管家</span>
-          </div>
-          <h1 class="hero-title">
-            <span class="title-main">LifePilot</span>
-            <span class="title-sub">一句话记录生活，AI 自动整理</span>
-          </h1>
-          <p class="hero-desc">
-            用一句话记录今天做了什么、接下来要做什么，自动生成已办、待办、提醒、习惯与计划。
-          </p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" id="btn-start">立即开始</button>
-            <button class="btn btn-secondary" id="btn-example">查看示例</button>
-          </div>
-        </div>
-        <div class="hero-visual">
-          <div class="spline-container" id="spline-container">
-            <!-- Spline 3D Scene -->
-            <iframe 
-              src="https://prod.spline.design/U9O6K7fXziMEU7Wu/scene.splinecode"
-              frameborder="0"
-              width="100%"
-              height="100%"
-              style="pointer-events: none; border: none;"
-              loading="lazy"
-              title="LifePilot 3D Scene"
-            ></iframe>
-            <!-- Fallback -->
-            <div class="spline-fallback">
-              <div class="fallback-icon">🎯</div>
-              <div class="fallback-text">LifePilot</div>
-              <div class="fallback-desc">AI 生活管家</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Workbench Section -->
-    <section class="workbench" id="workbench">
-      <div class="workbench-grid">
-        <!-- Left: Input -->
-        <div>
-          <div class="card">
-            <h3>✍️ 记录你的生活</h3>
-            <textarea id="life-input" placeholder="输入一句话，例如：我今天写完了博客，跑了 3 公里，明天要投简历..."></textarea>
-            <div class="actions">
-              <button class="btn btn-primary" id="btn-generate">🚀 生成我的生活计划</button>
-              <button class="btn btn-secondary" id="btn-load-example">载入示例</button>
-            </div>
-          </div>
-          
-          <div class="card" style="margin-top: 1.5rem;">
-            <h3>📊 快速统计</h3>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="stat-done">0</div>
-                <div class="stat-label">已完成</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="stat-todos">0</div>
-                <div class="stat-label">待办</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="stat-habits">0</div>
-                <div class="stat-label">习惯</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="stat-suggestions">0</div>
-                <div class="stat-label">建议</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Results -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <h3>📋 解析结果</h3>
-              <span class="badge badge-gold" id="mode-badge">本地模式</span>
-            </div>
-            
-            <div id="empty-state" class="empty-state">
-              <div class="empty-icon">📝</div>
-              <div class="empty-title">开始记录</div>
-              <div class="empty-desc">输入一句话，系统会自动解析成已办、待办、习惯与计划</div>
-            </div>
-            
-            <div id="done-section" class="hidden" style="margin-bottom: 1.5rem;">
-              <h4 style="color: var(--success); margin-bottom: 0.75rem;">✅ 已完成</h4>
-              <div id="done-list"></div>
-            </div>
-            
-            <div id="todos-section" class="hidden" style="margin-bottom: 1.5rem;">
-              <h4 style="color: var(--gold); margin-bottom: 0.75rem;">📋 待办事项</h4>
-              <div id="todos-list"></div>
-            </div>
-            
-            <div id="habits-section" class="hidden" style="margin-bottom: 1.5rem;">
-              <h4 style="color: var(--mint); margin-bottom: 0.75rem;">🏃 习惯记录</h4>
-              <div id="habits-list"></div>
-            </div>
-            
-            <div id="suggestions-section" class="hidden">
-              <h4 style="color: var(--amber); margin-bottom: 0.75rem;">💡 智能建议</h4>
-              <div id="suggestions-list"></div>
-            </div>
-          </div>
-          
-          <div id="action-buttons" class="hidden" style="margin-top: 1rem;">
-            <div class="actions">
-              <button class="btn btn-primary" id="btn-save">💾 保存记录</button>
-              <button class="btn btn-secondary" id="btn-export">📄 导出日报</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- History Section -->
-    <section class="history-section" id="history">
-      <div class="container">
-        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">📚 历史记录</h2>
-        <div id="history-list">
-          <div class="empty-state">
-            <div class="empty-icon">📚</div>
-            <div class="empty-title">暂无历史记录</div>
-            <div class="empty-desc">生成计划后会自动保存到历史</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Command Palette -->
-    <div class="command-palette" id="command-palette">
-      <div class="command-box">
-        <input class="command-input" id="command-input" placeholder="输入命令..." />
-        <div class="command-list">
-          <div class="command-item" data-action="generate">
-            <span>🚀</span>
-            <span>生成生活计划</span>
-            <span class="kbd">Ctrl+Enter</span>
-          </div>
-          <div class="command-item" data-action="example">
-            <span>📝</span>
-            <span>载入示例</span>
-          </div>
-          <div class="command-item" data-action="save">
-            <span>💾</span>
-            <span>保存记录</span>
-            <span class="kbd">Ctrl+S</span>
-          </div>
-          <div class="command-item" data-action="export">
-            <span>📄</span>
-            <span>导出日报</span>
-          </div>
-          <div class="command-item" data-action="clear">
-            <span>🗑️</span>
-            <span>清空</span>
+      <div>
+        <div class="spline-container">
+          <iframe 
+            src="https://prod.spline.design/U9O6K7fXziMEU7Wu/scene.splinecode"
+            style="pointer-events: none; border: none;"
+            loading="lazy"
+            title="LifePilot 3D Scene"
+          ></iframe>
+          <div class="spline-fallback">
+            <div class="fallback-icon">🎯</div>
+            <div class="fallback-text">LifePilot</div>
+            <div class="fallback-desc">AI 生活管家</div>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+  <section class="workbench" id="workbench">
+    <div class="workbench-grid">
+      <div>
+        <div class="card">
+          <h3>✍️ 记录你的生活</h3>
+          <textarea id="life-input" placeholder="输入一句话，例如：我今天写完了博客，跑了 3 公里，明天要投简历..."></textarea>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-generate">🚀 生成我的生活计划</button>
+            <button class="btn btn-secondary" id="btn-load-example">载入示例</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>📊 快速统计</h3>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="stat-done">0</div><div class="stat-label">已完成</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-todos">0</div><div class="stat-label">待办</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-habits">0</div><div class="stat-label">习惯</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-suggestions">0</div><div class="stat-label">建议</div></div>
+          </div>
+        </div>
+      </div>
 
-    <script>
-      const apiBaseUrl = '{apiBaseUrl}';
-      const input = document.getElementById('life-input');
-      const example = '我今天完成了博客首页优化，跑步 3 公里，明天上午要投简历，周五前准备 AI 面试项目。';
-      let currentItems = [];
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <h3>📋 解析结果</h3>
+            <span class="badge badge-gold" id="mode-badge">{apiBaseUrl ? 'API 模式' : '本地模式'}</span>
+          </div>
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">📝</div>
+            <div class="empty-title">开始记录</div>
+            <div class="empty-desc">输入一句话，系统会自动解析</div>
+          </div>
+          <div id="done-section" class="hidden" style="margin-bottom:1.5rem;">
+            <h4 style="color:var(--success);margin-bottom:0.75rem;">✅ 已完成</h4>
+            <div id="done-list"></div>
+          </div>
+          <div id="todos-section" class="hidden" style="margin-bottom:1.5rem;">
+            <h4 style="color:var(--gold);margin-bottom:0.75rem;">📋 待办事项</h4>
+            <div id="todos-list"></div>
+          </div>
+          <div id="habits-section" class="hidden" style="margin-bottom:1.5rem;">
+            <h4 style="color:var(--mint);margin-bottom:0.75rem;">🏃 习惯记录</h4>
+            <div id="habits-list"></div>
+          </div>
+          <div id="suggestions-section" class="hidden">
+            <h4 style="color:var(--amber);margin-bottom:0.75rem;">💡 智能建议</h4>
+            <div id="suggestions-list"></div>
+          </div>
+        </div>
+        <div id="action-buttons" class="hidden" style="margin-top:1rem;">
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-save">💾 保存记录</button>
+            <button class="btn btn-secondary" id="btn-export">📄 导出日报</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      // Toast notification
-      function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = `toast toast-${type} show`;
-        setTimeout(() => toast.classList.remove('show'), 3000);
+  <section class="history-section" id="history">
+    <div class="container">
+      <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">📚 历史记录</h2>
+      <div id="history-list">
+        <div class="empty-state">
+          <div class="empty-icon">📚</div>
+          <div class="empty-title">暂无历史记录</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="command-palette" id="command-palette">
+    <div class="command-box">
+      <input class="command-input" id="command-input" placeholder="输入命令..." />
+      <div class="command-list">
+        <div class="command-item" data-action="generate">
+          <span>🚀</span><span>生成生活计划</span><span class="kbd">Ctrl+Enter</span>
+        </div>
+        <div class="command-item" data-action="example">
+          <span>📝</span><span>载入示例</span>
+        </div>
+        <div class="command-item" data-action="save">
+          <span>💾</span><span>保存记录</span><span class="kbd">Ctrl+S</span>
+        </div>
+        <div class="command-item" data-action="export">
+          <span>📄</span><span>导出日报</span>
+        </div>
+        <div class="command-item" data-action="clear">
+          <span>🗑️</span><span>清空</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const apiBaseUrl = '{apiBaseUrl}';
+    const input = document.getElementById('life-input');
+    const example = '我今天完成了博客首页优化，跑步 3 公里，明天上午要投简历，周五前准备 AI 面试项目。';
+    let currentItems = [];
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Command palette
+    const commandPalette = document.getElementById('command-palette');
+    const commandInput = document.getElementById('command-input');
+    
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        commandPalette.classList.toggle('open');
+        if (commandPalette.classList.contains('open')) commandInput.focus();
       }
+      if (e.key === 'Escape') commandPalette.classList.remove('open');
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); generate(); }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); save(); }
+    });
+    
+    document.querySelectorAll('.command-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action;
+        commandPalette.classList.remove('open');
+        switch (action) {
+          case 'generate': generate(); break;
+          case 'example': input.value = example; showToast('已载入示例'); break;
+          case 'save': save(); break;
+          case 'export': exportReport(); break;
+          case 'clear': clear(); break;
+        }
+      });
+    });
 
-      // Command palette
-      const commandPalette = document.getElementById('command-palette');
-      const commandInput = document.getElementById('command-input');
+    function parse(text) {
+      const done = [], todos = [], habits = [], suggestions = [];
+      const doneKw = ['完成了','写完了','做完了','跑了','学了','看完了','交了','处理了','已经','搞定'];
+      const todoKw = ['要','需要','计划','准备','记得','明天','后天','周五前','下周'];
+      const habitKw = ['跑步','健身','阅读','学习','冥想','喝水','运动'];
+
+      text.split(/[,，。；;\n]+/).filter(s => s.trim()).forEach(seg => {
+        const t = seg.trim();
+        if (habitKw.some(k => t.includes(k)) && doneKw.some(k => t.includes(k))) {
+          habits.push({ title: t }); done.push({ title: t }); return;
+        }
+        if (doneKw.some(k => t.includes(k))) { done.push({ title: t }); return; }
+        if (todoKw.some(k => t.includes(k))) {
+          todos.push({ title: t, due: t.includes('明天') ? '明天' : t.includes('周五') ? '周五' : '' }); return;
+        }
+        if (habitKw.some(k => t.includes(k))) { habits.push({ title: t }); return; }
+        todos.push({ title: t });
+      });
+
+      if (todos.length) suggestions.push(`建议今天先完成: ${todos[0].title}`);
+      if (habits.length) suggestions.push('坚持记录习惯，有助于养成好习惯');
+      return { done, todos, habits, suggestions };
+    }
+
+    async function generate() {
+      const text = input.value.trim();
+      if (!text) { showToast('请输入内容', 'error'); return; }
       
-      document.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-          e.preventDefault();
-          commandPalette.classList.toggle('open');
-          if (commandPalette.classList.contains('open')) commandInput.focus();
-        }
-        if (e.key === 'Escape') commandPalette.classList.remove('open');
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-          e.preventDefault();
-          generate();
-        }
-        if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-          e.preventDefault();
-          save();
-        }
-      });
+      const btn = document.getElementById('btn-generate');
+      btn.disabled = true; btn.textContent = '⏳ 解析中...';
       
-      document.querySelectorAll('.command-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const action = item.dataset.action;
-          commandPalette.classList.remove('open');
-          
-          switch (action) {
-            case 'generate': generate(); break;
-            case 'example': input.value = example; showToast('已载入示例'); break;
-            case 'save': save(); break;
-            case 'export': exportReport(); break;
-            case 'clear': clear(); break;
-          }
-        });
-      });
-
-      // Parse function
-      function parse(text) {
-        const done = [], todos = [], habits = [], suggestions = [];
-        const doneKw = ['完成了', '写完了', '做完了', '跑了', '学了', '看完了', '交了', '处理了', '已经', '搞定'];
-        const todoKw = ['要', '需要', '计划', '准备', '记得', '明天', '后天', '周五前', '下周'];
-        const habitKw = ['跑步', '健身', '阅读', '学习', '冥想', '喝水', '运动'];
-
-        text.split(/[,，。；;\n]+/).filter(s => s.trim()).forEach(seg => {
-          const t = seg.trim();
-          if (habitKw.some(k => t.includes(k)) && doneKw.some(k => t.includes(k))) {
-            habits.push({ title: t });
-            done.push({ title: t });
-            return;
-          }
-          if (doneKw.some(k => t.includes(k))) { done.push({ title: t }); return; }
-          if (todoKw.some(k => t.includes(k))) {
-            todos.push({ title: t, due: t.includes('明天') ? '明天' : t.includes('周五') ? '周五' : '' });
-            return;
-          }
-          if (habitKw.some(k => t.includes(k))) { habits.push({ title: t }); return; }
-          todos.push({ title: t });
-        });
-
-        if (todos.length) suggestions.push(`建议今天先完成: ${todos[0].title}`);
-        if (habits.length) suggestions.push('坚持记录习惯，有助于养成好习惯');
-
-        return { done, todos, habits, suggestions };
-      }
-
-      // Generate
-      async function generate() {
-        const text = input.value.trim();
-        if (!text) { showToast('请输入内容', 'error'); return; }
-
-        const btn = document.getElementById('btn-generate');
-        btn.disabled = true;
-        btn.textContent = '⏳ 解析中...';
-
-        let result;
-        try {
-          if (apiBaseUrl) {
-            const r = await fetch(`${apiBaseUrl}/api/lifepilot/parse-entry`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text })
-            });
-            if (r.ok) result = await r.json();
-          }
-        } catch (e) {}
-
-        if (!result) result = parse(text);
-        currentItems = [...result.done, ...result.todos, ...result.habits];
-
-        // Update stats
-        document.getElementById('stat-done').textContent = result.done.length;
-        document.getElementById('stat-todos').textContent = result.todos.length;
-        document.getElementById('stat-habits').textContent = result.habits.length;
-        document.getElementById('stat-suggestions').textContent = result.suggestions.length;
-
-        // Show results
-        document.getElementById('empty-state').classList.add('hidden');
-
-        if (result.done.length) {
-          document.getElementById('done-section').classList.remove('hidden');
-          document.getElementById('done-list').innerHTML = result.done.map(i =>
-            `<div class="item"><div class="item-check checked"></div><div class="item-title">${i.title}</div></div>`
-          ).join('');
+      let result;
+      try {
+        if (apiBaseUrl) {
+          const r = await fetch(`${apiBaseUrl}/api/lifepilot/parse-entry`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          if (r.ok) result = await r.json();
         }
-
-        if (result.todos.length) {
-          document.getElementById('todos-section').classList.remove('hidden');
-          document.getElementById('todos-list').innerHTML = result.todos.map(i =>
-            `<div class="item"><div class="item-check" onclick="this.classList.toggle('checked')"></div><div class="item-title">${i.title}</div>${i.due ? `<span class="badge badge-gold">${i.due}</span>` : ''}</div>`
-          ).join('');
-        }
-
-        if (result.habits.length) {
-          document.getElementById('habits-section').classList.remove('hidden');
-          document.getElementById('habits-list').innerHTML = result.habits.map(i =>
-            `<div class="item"><div class="item-title">🏃 ${i.title}</div></div>`
-          ).join('');
-        }
-
-        if (result.suggestions.length) {
-          document.getElementById('suggestions-section').classList.remove('hidden');
-          document.getElementById('suggestions-list').innerHTML = result.suggestions.map(s =>
-            `<div class="suggestion">💡 ${s}</div>`
-          ).join('');
-        }
-
-        document.getElementById('action-buttons').classList.remove('hidden');
-        btn.disabled = false;
-        btn.textContent = '🚀 生成我的生活计划';
-        showToast('解析完成');
+      } catch (e) {}
+      
+      if (!result) result = parse(text);
+      currentItems = [...result.done, ...result.todos, ...result.habits];
+      
+      document.getElementById('stat-done').textContent = result.done.length;
+      document.getElementById('stat-todos').textContent = result.todos.length;
+      document.getElementById('stat-habits').textContent = result.habits.length;
+      document.getElementById('stat-suggestions').textContent = result.suggestions.length;
+      
+      document.getElementById('empty-state').classList.add('hidden');
+      
+      if (result.done.length) {
+        document.getElementById('done-section').classList.remove('hidden');
+        document.getElementById('done-list').innerHTML = result.done.map(i =>
+          `<div class="item"><div class="item-check checked"></div><div class="item-title">${i.title}</div></div>`
+        ).join('');
       }
-
-      // Save
-      function save() {
-        localStorage.setItem('mimo_lifepilot', JSON.stringify({
-          text: input.value,
-          items: currentItems,
-          ts: Date.now()
-        }));
-        showToast('已保存到本地');
-        renderHistory();
+      if (result.todos.length) {
+        document.getElementById('todos-section').classList.remove('hidden');
+        document.getElementById('todos-list').innerHTML = result.todos.map(i =>
+          `<div class="item"><div class="item-check" onclick="this.classList.toggle('checked')"></div><div class="item-title">${i.title}</div>${i.due ? `<span class="badge badge-gold">${i.due}</span>` : ''}</div>`
+        ).join('');
       }
-
-      // Export
-      function exportReport() {
-        let md = `# 生活记录\n\n日期: ${new Date().toLocaleDateString('zh-CN')}\n\n`;
-        md += `## 已完成\n${currentItems.map(i => `- ${i.title}`).join('\n')}\n\n`;
-        md += `---\n*由 LifePilot 生成*`;
-        const blob = new Blob([md], { type: 'text/markdown' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `life-${new Date().toISOString().split('T')[0]}.md`;
-        a.click();
-        showToast('已导出日报');
+      if (result.habits.length) {
+        document.getElementById('habits-section').classList.remove('hidden');
+        document.getElementById('habits-list').innerHTML = result.habits.map(i =>
+          `<div class="item"><div class="item-title">🏃 ${i.title}</div></div>`
+        ).join('');
       }
-
-      // Clear
-      function clear() {
-        input.value = '';
-        ['empty-state', 'done-section', 'todos-section', 'habits-section', 'suggestions-section', 'action-buttons'].forEach(id => {
-          const el = document.getElementById(id);
-          if (id === 'empty-state') el.classList.remove('hidden');
-          else el.classList.add('hidden');
-        });
-        ['stat-done', 'stat-todos', 'stat-habits', 'stat-suggestions'].forEach(id => {
-          document.getElementById(id).textContent = '0';
-        });
-        showToast('已清空');
+      if (result.suggestions.length) {
+        document.getElementById('suggestions-section').classList.remove('hidden');
+        document.getElementById('suggestions-list').innerHTML = result.suggestions.map(s =>
+          `<div class="suggestion">💡 ${s}</div>`
+        ).join('');
       }
+      
+      document.getElementById('action-buttons').classList.remove('hidden');
+      btn.disabled = false; btn.textContent = '🚀 生成我的生活计划';
+      showToast('解析完成');
+    }
 
-      // History
-      function renderHistory() {
-        const saved = localStorage.getItem('mimo_lifepilot');
-        if (!saved) return;
-        
-        try {
-          const data = JSON.parse(saved);
-          document.getElementById('history-list').innerHTML = `
-            <div class="item">
-              <div class="item-title">${data.text?.substring(0, 50)}...</div>
-              <span class="badge badge-gold">${new Date(data.ts).toLocaleDateString('zh-CN')}</span>
-            </div>
-          `;
-        } catch (e) {}
-      }
-
-      // Event listeners
-      document.getElementById('btn-start')?.addEventListener('click', () => {
-        document.getElementById('workbench')?.scrollIntoView({ behavior: 'smooth' });
-      });
-      document.getElementById('btn-example')?.addEventListener('click', () => {
-        input.value = example;
-        showToast('已载入示例');
-      });
-      document.getElementById('btn-generate')?.addEventListener('click', generate);
-      document.getElementById('btn-load-example')?.addEventListener('click', () => {
-        input.value = example;
-        showToast('已载入示例');
-      });
-      document.getElementById('btn-save')?.addEventListener('click', save);
-      document.getElementById('btn-export')?.addEventListener('click', exportReport);
-
-      // Initialize
+    function save() {
+      localStorage.setItem('mimo_lifepilot', JSON.stringify({ text: input.value, items: currentItems, ts: Date.now() }));
+      showToast('已保存到本地');
       renderHistory();
-    </script>
-  </body>
+    }
+
+    function exportReport() {
+      let md = `# 生活记录\n\n日期: ${new Date().toLocaleDateString('zh-CN')}\n\n`;
+      md += `## 已完成\n${currentItems.map(i => `- ${i.title}`).join('\n')}\n\n`;
+      md += `---\n*由 LifePilot 生成*`;
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `life-${new Date().toISOString().split('T')[0]}.md`;
+      a.click();
+      showToast('已导出日报');
+    }
+
+    function clear() {
+      input.value = '';
+      ['empty-state', 'done-section', 'todos-section', 'habits-section', 'suggestions-section', 'action-buttons'].forEach(id => {
+        const el = document.getElementById(id);
+        if (id === 'empty-state') el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+      ['stat-done', 'stat-todos', 'stat-habits', 'stat-suggestions'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+      showToast('已清空');
+    }
+
+    function renderHistory() {
+      const saved = localStorage.getItem('mimo_lifepilot');
+      if (!saved) return;
+      try {
+        const data = JSON.parse(saved);
+        document.getElementById('history-list').innerHTML = `
+          <div class="item">
+            <div class="item-title">${data.text?.substring(0, 50)}...</div>
+            <span class="badge badge-gold">${new Date(data.ts).toLocaleDateString('zh-CN')}</span>
+          </div>
+        `;
+      } catch (e) {}
+    }
+
+    document.getElementById('btn-start')?.addEventListener('click', () => {
+      document.getElementById('workbench')?.scrollIntoView({ behavior: 'smooth' });
+    });
+    document.getElementById('btn-example')?.addEventListener('click', () => { input.value = example; showToast('已载入示例'); });
+    document.getElementById('btn-generate')?.addEventListener('click', generate);
+    document.getElementById('btn-load-example')?.addEventListener('click', () => { input.value = example; showToast('已载入示例'); });
+    document.getElementById('btn-save')?.addEventListener('click', save);
+    document.getElementById('btn-export')?.addEventListener('click', exportReport);
+
+    renderHistory();
+  </script>
+</body>
 </html>
